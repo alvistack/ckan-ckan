@@ -1,0 +1,5 @@
+python-ckan (100:2.12.0~alpha0+20250829.89107b26-1) UNRELEASED; urgency=medium
+
+  * https://github.com/ckan/ckan/commit/89107b266508a830e903d2765670827380f1e5ae
+
+ -- Wong Hoi Sing Edison <hswong3i@pantarei-design.com>  Fri, 29 Aug 2025 13:22:53 +0800

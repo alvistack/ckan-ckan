@@ -1,0 +1,5 @@
+python-ckan source: file-without-copyright-information
+python-ckan source: no-debian-changes
+python-ckan source: source-contains-prebuilt-windows-binary
+python-ckan source: source-is-missing
+python-ckan source: source-package-encodes-python-version
