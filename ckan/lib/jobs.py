@@ -21,13 +21,11 @@ from __future__ import annotations
 
 import logging
 from typing import Any, Union, Callable, Iterable, Optional, cast
-from redis import Redis
 
 import rq
-from rq.connections import push_connection
 from rq.exceptions import NoSuchJobError
 from rq.job import Job
-from rq.utils import ensure_list
+from rq.utils import ensure_job_list
 
 from ckan.lib.redis import connect_to_redis
 from ckan.common import config
@@ -41,17 +39,6 @@ DEFAULT_QUEUE_NAME = u'default'
 
 # RQ job queues. Do not use this directly, use ``get_queue`` instead.
 _queues: dict[str, rq.Queue] = {}
-
-
-def _connect() -> Redis:
-    u'''
-    Connect to Redis and tell RQ about it.
-
-    Workaround for https://github.com/nvie/rq/issues/479.
-    '''
-    conn = connect_to_redis()
-    push_connection(conn)
-    return conn
 
 
 def _get_queue_name_prefix() -> str:
@@ -94,7 +81,7 @@ def get_all_queues() -> list[rq.Queue]:
 
     .. seealso:: :py:func:`get_queue`
     '''
-    redis_conn = _connect()
+    redis_conn = connect_to_redis()
     prefix = _get_queue_name_prefix()
     return [q for q in rq.Queue.all(connection=redis_conn) if
             q.name.startswith(prefix)]
@@ -120,7 +107,7 @@ def get_queue(name: str = DEFAULT_QUEUE_NAME) -> rq.Queue:
         return _queues[fullname]
     except KeyError:
         log.debug(u'Initializing background job queue "{}"'.format(name))
-        redis_conn = _connect()
+        redis_conn = connect_to_redis()
         queue = _queues[fullname] = rq.Queue(fullname, connection=redis_conn)
         return queue
 
@@ -190,7 +177,7 @@ def job_from_id(id: str) -> Job:
     :raises KeyError: if no job with that ID exists.
     '''
     try:
-        return Job.fetch(id, connection=_connect())
+        return Job.fetch(id, connection=connect_to_redis())
     except NoSuchJobError:
         raise KeyError(u'There is no job with ID "{}".'.format(id))
 
@@ -255,7 +242,7 @@ class Worker(rq.Worker):
             with the name of a single queue or a list of queue names.
             If not given then the default queue is used.
         '''
-        queue_names = cast(Iterable[str], ensure_list(
+        queue_names = cast(Iterable[str], ensure_job_list(
             queues or [DEFAULT_QUEUE_NAME]
         ))
 

@@ -1,0 +1,4 @@
+python3-ckan: copyright-without-copyright-notice
+python3-ckan: initial-upload-closes-no-bugs
+python3-ckan: no-manual-page
+python3-ckan: zero-byte-file-in-doc-directory
